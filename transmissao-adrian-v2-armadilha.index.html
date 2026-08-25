@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Transmissão Interceptada — Protocolo 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0d0b08;
+    --paper: #1a1611;
+    --amber: #c9a227;
+    --amber-dim: #6b5a1e;
+    --red: #8b2635;
+    --green: #4a7c59;
+    --ink: #e8dfc8;
+    --ink-dim: #7a715c;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);height:100%;overflow-x:hidden;}
+  body{
+    font-family:'Crimson Text', serif;
+    display:flex; flex-direction:column; align-items:center;
+    min-height:100vh; padding:32px 20px 60px; position:relative;
+  }
+  .grain{
+    position:fixed; inset:0; pointer-events:none; z-index:5; opacity:0.06; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .scanlines{
+    position:fixed; inset:0; pointer-events:none; z-index:6;
+    background:repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 3px);
+    opacity:0.35;
+  }
+  .eyebrow{
+    font-family:'Special Elite', monospace; font-size:11px; letter-spacing:4px;
+    color:var(--red); text-transform:uppercase; opacity:0.85; margin-bottom:6px;
+    animation:flicker 4s infinite;
+  }
+  @keyframes flicker{0%,100%{opacity:0.85;} 42%{opacity:0.85;} 43%{opacity:0.3;} 44%{opacity:0.85;}}
+  h1{
+    font-family:'Special Elite', monospace; font-size:20px; letter-spacing:2px;
+    color:var(--amber); text-align:center; margin:0 0 4px; text-transform:uppercase;
+  }
+  .subtitle{
+    font-size:14px; color:var(--ink-dim); text-align:center; font-style:italic;
+    margin-bottom:36px; max-width:320px; line-height:1.5;
+  }
+  .terminal{
+    width:100%; max-width:380px; background:var(--paper); border:1px solid #2c2519;
+    border-radius:2px; padding:22px 20px 26px;
+    box-shadow: inset 0 0 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(201,162,39,0.08);
+    position:relative; transition: box-shadow 0.5s ease;
+  }
+  .terminal::before{
+    content:""; position:absolute; top:0; left:0; right:0; height:1px;
+    background:linear-gradient(90deg, transparent, var(--amber-dim), transparent);
+  }
+  .terminal.decoy{ box-shadow: inset 0 0 40px rgba(139,38,53,0.15), 0 0 24px rgba(139,38,53,0.25); }
+  .terminal.true{ box-shadow: inset 0 0 40px rgba(74,124,89,0.15), 0 0 24px rgba(74,124,89,0.3); }
+
+  .cipher-text{
+    font-family:'Special Elite', monospace; font-size:16px; line-height:1.9; letter-spacing:1px;
+    color:var(--amber); min-height:130px; text-shadow: 0 0 8px rgba(201,162,39,0.25);
+    word-wrap:break-word; transition:color 0.4s ease, text-shadow 0.4s ease;
+  }
+  .cipher-text.decoy-solved{ color:#d99a9a; text-shadow:0 0 10px rgba(139,38,53,0.4); }
+  .cipher-text.true-solved{ color:var(--ink); text-shadow:0 0 10px rgba(232,223,200,0.35); }
+
+  .status{
+    margin-top:14px; padding-top:12px; border-top:1px dashed #382e1c;
+    font-size:12px; letter-spacing:1px; font-family:'Special Elite', monospace;
+    opacity:0; transform:translateY(6px); transition:opacity 0.6s ease, transform 0.6s ease;
+  }
+  .status.show{opacity:0.9; transform:translateY(0);}
+  .status.decoy{ color:var(--red); }
+  .status.true{ color:var(--green); }
+
+  .signature{
+    margin-top:8px; font-size:13px; font-style:italic;
+    opacity:0; transition:opacity 0.8s ease 0.3s;
+  }
+  .signature.show{opacity:0.85;}
+  .signature.decoy{ color:#d99a9a; }
+  .signature.true{ color:var(--green); }
+
+  .dial-wrap{ margin-top:38px; display:flex; flex-direction:column; align-items:center; gap:14px; }
+  .dial-label{
+    font-family:'Special Elite', monospace; font-size:11px; letter-spacing:3px;
+    color:var(--ink-dim); text-transform:uppercase;
+  }
+  .dial{
+    width:150px; height:150px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #241f16, #0d0b08 70%);
+    border:1px solid #3a3120; position:relative;
+    box-shadow: 0 0 0 6px #0a0806, inset 0 0 20px rgba(0,0,0,0.6);
+  }
+  .dial-tick{ position:absolute; width:2px; height:8px; background:var(--amber-dim); left:50%; top:4px; transform-origin:1px 71px; }
+  .dial-tick.major{ background:var(--amber); height:11px; }
+  .dial-knob{
+    position:absolute; width:56px; height:56px; border-radius:50%; left:50%; top:50%; margin:-28px 0 0 -28px;
+    background:linear-gradient(160deg, #2b2417, #171208); border:1px solid #4a3d24;
+    cursor:grab; touch-action:none;
+    box-shadow: inset 0 2px 3px rgba(255,255,255,0.05), 0 3px 8px rgba(0,0,0,0.6);
+  }
+  .dial-knob::after{
+    content:""; position:absolute; top:6px; left:50%; width:2px; height:18px;
+    background:var(--amber); transform:translateX(-50%); box-shadow:0 0 6px rgba(201,162,39,0.6);
+  }
+  .dial-value{ font-family:'Special Elite', monospace; font-size:13px; color:var(--ink-dim); letter-spacing:2px; }
+  .dial-value b{ color:var(--amber); }
+  .hint{ margin-top:28px; font-size:12px; color:var(--ink-dim); text-align:center; max-width:290px; line-height:1.6; font-style:italic; }
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<div class="scanlines"></div>
+
+<div class="eyebrow">Protocolo de contrainteligência</div>
+<h1>Transmissão Interceptada</h1>
+<div class="subtitle">O primeiro sinal que fizer sentido não é o que você procura. Continue girando.</div>
+
+<div class="terminal" id="terminal">
+  <div class="cipher-text" id="cipherText"></div>
+  <div class="status" id="status"></div>
+  <div class="signature" id="signature"></div>
+</div>
+
+<div class="dial-wrap">
+  <div class="dial-label">Disco de cifra</div>
+  <div class="dial" id="dial"><div class="dial-knob" id="knob"></div></div>
+  <div class="dial-value">deslocamento: <b id="valDisplay">00</b></div>
+</div>
+
+<div class="hint">Adrian aprendeu isso antes de dormir: todo sistema de defesa deixa uma isca antes da verdade.</div>
+
+<script>
+// --- conteúdo editável ---
+const ENCODE_SHIFT = 7;             // ruído de fundo (posições sem sentido)
+const DECOY_SHIFT   = 11;           // posição da isca — parece resolvido, mas é falso
+const TRUE_SHIFT     = 12;          // uma posição além — a mensagem real
+
+const DECOY_TEXT = "ENCONTRE O ARQUIVO NO SERVIDOR SUL. ELE JA SABE QUE VOCE VEIO.";
+const DECOY_SIGN = "— A.";
+
+const TRUE_TEXT  = "NAO CONFIE NO PRIMEIRO SINAL. TODO PROTOCOLO DEIXA UMA ISCA UM PASSO ANTES DA VERDADE. EU SEI PORQUE FUI EU QUEM ENSINOU ISSO A ELE.";
+const TRUE_SIGN  = "— quem realmente escreveu isto.";
+
+function caesar(str, shift){
+  shift = ((shift % 26) + 26) % 26;
+  return str.replace(/[A-Z]/g, c => {
+    const code = c.charCodeAt(0) - 65;
+    return String.fromCharCode(((code + shift) % 26) + 65);
+  });
+}
+
+const cipherEl = document.getElementById('cipherText');
+const statusEl = document.getElementById('status');
+const sigEl = document.getElementById('signature');
+const valDisplay = document.getElementById('valDisplay');
+const terminalEl = document.getElementById('terminal');
+const dial = document.getElementById('dial');
+const knob = document.getElementById('knob');
+
+for(let i=0;i<26;i++){
+  const tick = document.createElement('div');
+  tick.className = 'dial-tick' + (i % 5 === 0 ? ' major' : '');
+  tick.style.transform = `rotate(${i * (360/26)}deg)`;
+  dial.insertBefore(tick, knob);
+}
+
+let userShift = 0;
+const NOISE = "A CIFRA NAO SE ENTREGA NA PRIMEIRA VOLTA. QUEM CONFIA CEDO DEMAIS JA PERDEU.";
+
+function render(){
+  const s = ((userShift % 26)+26)%26;
+  terminalEl.classList.remove('decoy','true');
+  cipherEl.classList.remove('decoy-solved','true-solved');
+  statusEl.classList.remove('show','decoy','true');
+  sigEl.classList.remove('show','decoy','true');
+
+  if(s === DECOY_SHIFT){
+    cipherEl.textContent = DECOY_TEXT;
+    cipherEl.classList.add('decoy-solved');
+    terminalEl.classList.add('decoy');
+    statusEl.textContent = "SINAL DECODIFICADO";
+    statusEl.classList.add('show','decoy');
+    sigEl.textContent = DECOY_SIGN;
+    sigEl.classList.add('show','decoy');
+  } else if(s === TRUE_SHIFT){
+    cipherEl.textContent = TRUE_TEXT;
+    cipherEl.classList.add('true-solved');
+    terminalEl.classList.add('true');
+    statusEl.textContent = "SINAL VERDADEIRO";
+    statusEl.classList.add('show','true');
+    sigEl.textContent = TRUE_SIGN;
+    sigEl.classList.add('show','true');
+  } else {
+    const displayShift = ENCODE_SHIFT - s;
+    cipherEl.textContent = caesar(NOISE, displayShift);
+  }
+  valDisplay.textContent = String(s).padStart(2,'0');
+  knob.style.transform = `translate(-50%,-50%) rotate(${s * (360/26)}deg)`;
+}
+
+let dragging = false;
+function angleFromEvent(e, rect){
+  const cx = rect.left + rect.width/2, cy = rect.top + rect.height/2;
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  const dx = clientX - cx, dy = clientY - cy;
+  let deg = Math.atan2(dy, dx) * 180/Math.PI + 90;
+  if(deg < 0) deg += 360;
+  return deg;
+}
+function startDrag(){ dragging = true; }
+function endDrag(){ dragging = false; }
+function onMove(e){
+  if(!dragging) return;
+  e.preventDefault();
+  const rect = dial.getBoundingClientRect();
+  const deg = angleFromEvent(e, rect);
+  const step = 360/26;
+  userShift = Math.round(deg/step) % 26;
+  render();
+}
+knob.addEventListener('mousedown', startDrag);
+dial.addEventListener('mousedown', startDrag);
+window.addEventListener('mouseup', endDrag);
+window.addEventListener('mousemove', onMove);
+knob.addEventListener('touchstart', startDrag, {passive:true});
+dial.addEventListener('touchstart', startDrag, {passive:true});
+window.addEventListener('touchend', endDrag);
+window.addEventListener('touchmove', onMove, {passive:false});
+
+render();
+</script>
+</body>
+</html>
