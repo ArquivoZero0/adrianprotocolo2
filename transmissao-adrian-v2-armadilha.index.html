@@ -119,7 +119,7 @@
 
 <div class="eyebrow">Protocolo de contrainteligência</div>
 <h1>Transmissão Interceptada</h1>
-<div class="subtitle">O primeiro sinal que fizer sentido não é o que você procura. Continue girando.</div>
+<div class="subtitle"> O primeiro sinal que fizer sentido não é o que você procura.</div>
 
 <div class="terminal" id="terminal">
   <div class="cipher-text" id="cipherText"></div>
@@ -133,7 +133,7 @@
   <div class="dial-value">deslocamento: <b id="valDisplay">00</b></div>
 </div>
 
-<div class="hint">Adrian aprendeu isso antes de dormir: todo sistema de defesa deixa uma isca antes da verdade.</div>
+<div class="hint"> Todo sistema de defesa deixa uma isca antes da verdade.</div>
 
 <script>
 // --- conteúdo editável ---
@@ -144,8 +144,8 @@ const TRUE_SHIFT     = 12;          // uma posição além — a mensagem real
 const DECOY_TEXT = "ENCONTRE O ARQUIVO NO SERVIDOR SUL. ELE JA SABE QUE VOCE VEIO.";
 const DECOY_SIGN = "— A.";
 
-const TRUE_TEXT  = "NAO CONFIE NO PRIMEIRO SINAL. TODO PROTOCOLO DEIXA UMA ISCA UM PASSO ANTES DA VERDADE. EU SEI PORQUE FUI EU QUEM ENSINOU ISSO A ELE.";
-const TRUE_SIGN  = "— quem realmente escreveu isto.";
+const TRUE_TEXT  = "H JPMYH UHV ZL LUAYLNH UH WYPTLPYH CVSAH. XBLT JVUMPH JLKV KLTHPZ QH WLYKLB.";
+const TRUE_SIGN  = "— a quem realmente importa";
 
 function caesar(str, shift){
   shift = ((shift % 26) + 26) % 26;
@@ -171,7 +171,7 @@ for(let i=0;i<26;i++){
 }
 
 let userShift = 0;
-const NOISE = "A CIFRA NAO SE ENTREGA NA PRIMEIRA VOLTA. QUEM CONFIA CEDO DEMAIS JA PERDEU.";
+const NOISE = "A VERDADE NAO SE ENTREGA NA PRIMEIRA TENTATIVA. QUEM CONFIA CEDO DEMAIS, CORRE RISCOS.";
 
 function render(){
   const s = ((userShift % 26)+26)%26;
