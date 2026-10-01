@@ -128,9 +128,22 @@
     <div class="subtitle">Protocolo de Contrainteligência</div>
     <h1 class="title">TRANSMISSÃO INTERCEPTADA</h1>
     <div class="instruction">
-        O primeiro sinal que fizer sentido não é o que você procura.<br>Continue girando.
+        O primeiro sinal que fizer sentido não é o que você procura.<br>
     </div>
+  <div class="signature" id="signature"></div>
+</div>
 
+<div class="dial-wrap">
+  <div class="dial-label">Disco de cifra</div>
+  <div class="dial" id="dial"><div class="dial-knob" id="knob"></div></div>
+  <div class="dial-value">deslocamento: <b id="valDisplay">00</b></div>
+</div>
+
+<div class="hint"> Todo sistema de defesa deixa uma isca antes da verdade.</div>
+
+<script>
+// --- conteúdo editável ---
+const ENCODE_SHIFT = 7;             // ruído de fundo (posições sem sentido)
     <div class="cipher-box">
         <!-- Texto original encriptado (Deslocamento 0) -->
         <div id="text-display" class="cipher-text">
